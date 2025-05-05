@@ -1,0 +1,186 @@
+-- Xeno-Compatible Script Hub
+local UserInput = game:GetService("UserInputService")
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+
+-- Main GUI
+local ScriptHub = {ActiveScripts = {}}
+
+function ScriptHub:CreateGUI()
+    -- Cleanup old GUI
+    if self.GUI then
+        self.GUI:Destroy()
+    end
+
+    -- Main Frame
+    local ScreenGui = Instance.new("ScreenGui")
+    local MainFrame = Instance.new("Frame")
+    local TitleBar = Instance.new("Frame")
+    local TitleText = Instance.new("TextLabel")
+    local CloseButton = Instance.new("TextButton")
+    local CategoryList = Instance.new("UIListLayout")
+
+    ScreenGui.Name = "ScriptHub"
+    ScreenGui.Parent = CoreGui
+    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+    MainFrame.Name = "MainFrame"
+    MainFrame.Parent = ScreenGui
+    MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+    MainFrame.BorderSizePixel = 0
+    MainFrame.Position = UDim2.new(0.5, -150, 0.5, -150)
+    MainFrame.Size = UDim2.new(0, 300, 0, 350)
+    MainFrame.Active = true
+    MainFrame.Draggable = true
+
+    TitleBar.Name = "TitleBar"
+    TitleBar.Parent = MainFrame
+    TitleBar.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+    TitleBar.BorderSizePixel = 0
+    TitleBar.Size = UDim2.new(1, 0, 0, 30)
+
+    TitleText.Name = "TitleText"
+    TitleText.Parent = TitleBar
+    TitleText.BackgroundTransparency = 1
+    TitleText.Size = UDim2.new(1, -30, 1, 0)
+    TitleText.Font = Enum.Font.GothamBold
+    TitleText.Text = "SCRIPT HUB"
+    TitleText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TitleText.TextSize = 14
+
+    CloseButton.Name = "CloseButton"
+    CloseButton.Parent = TitleBar
+    CloseButton.BackgroundTransparency = 1
+    CloseButton.Position = UDim2.new(1, -25, 0, 0)
+    CloseButton.Size = UDim2.new(0, 25, 1, 0)
+    CloseButton.Font = Enum.Font.GothamBold
+    CloseButton.Text = "X"
+    CloseButton.TextColor3 = Color3.fromRGB(255, 100, 100)
+    CloseButton.TextSize = 14
+    CloseButton.MouseButton1Click:Connect(function()
+        ScreenGui:Destroy()
+    end)
+
+    CategoryList.Parent = MainFrame
+    CategoryList.Padding = UDim.new(0, 5)
+    CategoryList.SortOrder = Enum.SortOrder.LayoutOrder
+
+    -- Panic button (P) and Hide (RShift)
+    UserInput.InputBegan:Connect(function(input, gameProcessed)
+        if input.KeyCode == Enum.KeyCode.P then
+            for _, script in pairs(self.ActiveScripts) do
+                pcall(function() script:Destroy() end)
+            end
+            self.ActiveScripts = {}
+        elseif input.KeyCode == Enum.KeyCode.RightShift then
+            MainFrame.Visible = not MainFrame.Visible
+        end
+    end)
+
+    self.GUI = ScreenGui
+    self.MainFrame = MainFrame
+    return MainFrame
+end
+
+function ScriptHub:AddCategory(name)
+    local CategoryFrame = Instance.new("Frame")
+    local CategoryTitle = Instance.new("TextButton")
+    local CategoryContent = Instance.new("Frame")
+    local ContentList = Instance.new("UIListLayout")
+
+    CategoryFrame.Name = name .. "Category"
+    CategoryFrame.Parent = self.MainFrame
+    CategoryFrame.BackgroundTransparency = 1
+    CategoryFrame.Size = UDim2.new(1, -10, 0, 0)
+    CategoryFrame.AutomaticSize = Enum.AutomaticSize.Y
+
+    CategoryTitle.Name = "CategoryTitle"
+    CategoryTitle.Parent = CategoryFrame
+    CategoryTitle.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+    CategoryTitle.BorderSizePixel = 0
+    CategoryTitle.Size = UDim2.new(1, 0, 0, 30)
+    CategoryTitle.Font = Enum.Font.GothamBold
+    CategoryTitle.Text = "  " .. name
+    CategoryTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CategoryTitle.TextSize = 13
+    CategoryTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+    CategoryContent.Name = "CategoryContent"
+    CategoryContent.Parent = CategoryFrame
+    CategoryContent.BackgroundTransparency = 1
+    CategoryContent.Position = UDim2.new(0, 0, 0, 35)
+    CategoryContent.Size = UDim2.new(1, 0, 0, 0)
+    CategoryContent.AutomaticSize = Enum.AutomaticSize.Y
+    CategoryContent.Visible = false
+
+    ContentList.Parent = CategoryContent
+    ContentList.SortOrder = Enum.SortOrder.LayoutOrder
+    ContentList.Padding = UDim.new(0, 5)
+
+    CategoryTitle.MouseButton1Click:Connect(function()
+        CategoryContent.Visible = not CategoryContent.Visible
+    end)
+
+    return CategoryContent
+end
+
+function ScriptHub:AddScript(parent, name, func)
+    local ScriptButton = Instance.new("TextButton")
+
+    ScriptButton.Name = name .. "Button"
+    ScriptButton.Parent = parent
+    ScriptButton.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+    ScriptButton.BorderSizePixel = 0
+    ScriptButton.Size = UDim2.new(1, 0, 0, 30)
+    ScriptButton.Font = Enum.Font.Gotham
+    ScriptButton.Text = name
+    ScriptButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ScriptButton.TextSize = 13
+
+    ScriptButton.MouseButton1Click:Connect(function()
+        local success, result = pcall(func)
+        if not success then
+            warn("Script error:", result)
+        else
+            table.insert(self.ActiveScripts, result or ScriptButton)
+        end
+    end)
+end
+
+-- Initialize GUI
+ScriptHub:CreateGUI()
+
+-- DAHOOD SCRIPTS
+local dahood = ScriptHub:AddCategory("DAHOOD")
+ScriptHub:AddScript(dahood, "Voke", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Actyrn/Scripts/main/Voke.lua"))()
+end)
+ScriptHub:AddScript(dahood, "Azure", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Actyrn/Scripts/main/AzureModded"))()
+end)
+ScriptHub:AddScript(dahood, "Zombie Animation", function()
+    while true do
+        local Animate = game.Players.LocalPlayer.Character.Animate
+        Animate.run.RunAnim.AnimationId = "http://www.roblox.com/asset/?id=616163682"
+        game.Players.LocalPlayer.Character.Humanoid.Jump = false
+        task.wait(1)
+    end
+end)
+ScriptHub:AddScript(dahood, "Index", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/valid99/index/refs/heads/main/tb"))()
+end)
+
+-- GROW A GARDEN SCRIPTS
+local garden = ScriptHub:AddCategory("GROW A GARDEN")
+ScriptHub:AddScript(garden, "Grow A Garden", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/ameicaa1/Grow-a-Garden/main/Grow_A_Garden.lua"))()
+end)
+ScriptHub:AddScript(garden, "Infinite Yield", function()
+    loadstring(game:HttpGet("https://cdn.wearedevs.net/scripts/Infinite%20Yield.txt"))()
+end)
+
+-- THA BRONX 3 SCRIPTS
+local bronx = ScriptHub:AddCategory("THA BRONX 3")
+ScriptHub:AddScript(bronx, "CIA", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/KirawzWeb/Script/main/loader%20beta.lua", true))()
+end)
