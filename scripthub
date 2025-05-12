@@ -169,7 +169,9 @@ end)
 ScriptHub:AddScript(dahood, "Index", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/valid99/index/refs/heads/main/tb"))()
 end)
-
+ScriptHub:AddScript(dahood, "silent", function()
+    loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidihook/skibidi.hook/refs/heads/main/Main/DanHood.lua'))()
+end)
 -- GROW A GARDEN SCRIPTS
 local garden = ScriptHub:AddCategory("GROW A GARDEN")
 ScriptHub:AddScript(garden, "Grow A Garden", function()
